@@ -9,6 +9,9 @@ setup(name='atoms2d',
       license='MIT',
       packages=['atoms2d'],
       zip_safe=False,
+      install_requires=[
+          'ase'
+      ],
       classifiers=[
           'Intended Audience :: Developers',
           'License :: OSI Approved :: MIT License',

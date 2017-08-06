@@ -252,20 +252,37 @@ def lh(A, B, rows, columns, type):
         structure.cell[2]
     ])
 
+    dz = 0
+
+    # Get A material TM z position
+    for i in range(len(A_top.positions)):
+        if (A_top.get_chemical_symbols()[i] == 'Mo' or
+                A_top.get_chemical_symbols()[i] == 'W'):
+            dz = A_top.positions[i][2]
+            break
+
     B_top = io.read(B + '.cif')
     B_top *= (2 * (columns + 1), 2 * rows, 1)
     B_top.to_monolayer()
     B_top.to_orthorhombic()
     B_bottom = B_top.copy()
+
+    # Get B material TM z position
+    for i in range(len(B_top.positions)):
+        if (B_top.get_chemical_symbols()[i] == 'Mo' or
+                B_top.get_chemical_symbols()[i] == 'W'):
+            dz -= B_top.positions[i][2]
+            break
+
     B_top.translate([
         -B_bottom.lat_const[0] / 2,
         structure.cell[1][1],
-        0
+        dz
     ])
     B_bottom.translate([
         -B_bottom.lat_const[0] / 2,
         -B_bottom.cell[1][1],
-        0
+        dz
     ])
     structure += B_top
     structure += B_bottom

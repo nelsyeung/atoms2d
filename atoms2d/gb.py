@@ -1,6 +1,7 @@
 import numpy as np
 import os
 
+from . import atoms
 from . import dislocation
 from . import io
 from . import private
@@ -146,8 +147,23 @@ def pbc_single(cif, rows, columns, type, strain=0, polarity=0):
     disloc_line = dislocation.line(type, primitive, rows, polarity=polarity)
 
     # Get the bottom/top most atom from the dislocation line
-    bottom_disloc = sorted(disloc_line.positions, key=lambda p: p[1],
-                           reverse=polarity != 0)[0]
+    disloc_sorted = sorted(disloc_line.positions, key=lambda p: p[1],
+                           reverse=polarity != 0)
+
+    bottom_disloc = disloc_sorted[0]
+    top_disloc = disloc_sorted[-1]
+
+    # Add the required extra atoms to the dislocation line
+    extra_atom = tm if polarity == 0 else dc
+    extra = atoms.Atoms(extra_atom,
+                        [(primitive.lat_const[0], 0, top_disloc[2])],
+                        cell=[1, 1, 1])
+    extra.rotate(-angle)
+    t = extra.copy()
+    t.reflect(0)
+    extra += t
+    extra.translate([top_disloc[0], top_disloc[1], 0])
+    disloc_line += extra
 
     # Move the dislocation line to one lattice constant away from the bottom
     # atom of the original structure

@@ -158,6 +158,12 @@ def pbc_single(cif, rows, columns, type, strain=0, polarity=0):
     extra = atoms.Atoms(extra_atom,
                         [(primitive.lat_const[0], 0, top_disloc[2])],
                         cell=[1, 1, 1])
+
+    if polarity == 1:
+        extra += atoms.Atoms(extra_atom,
+                             [(primitive.lat_const[0], 0,
+                                 disloc_sorted[-2][2])],
+                             cell=[1, 1, 1])
     extra.rotate(-angle)
     t = extra.copy()
     t.reflect(0)

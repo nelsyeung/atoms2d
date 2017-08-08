@@ -16,20 +16,20 @@ def relax(atoms, lat_const, steps=1):
     sorted_pos = [sorted(atoms.positions, key=lambda p: p[0]),
                   sorted(atoms.positions, key=lambda p: p[1])]
     boundaries = {
-        'top': sorted_pos[1][0][0] - (lat_const / 2 + correction),
+        'top': sorted_pos[1][-1][1] - (lat_const / 2 + correction),
         'right': sorted_pos[0][-1][0] - (lat_const / 2 + correction),
         'bottom': sorted_pos[1][0][1] + (lat_const / 2 + correction),
         'left': sorted_pos[0][0][0] + (lat_const / 2 + correction)
     }
 
-    for i in range(len(atoms.positions)):
-        graph.add_node(i, fixed=False, position=atoms.positions[i][:],
-                       symbol=symbols[i])
+    for i in atoms_range:
+        position = atoms.positions[i][:]
+        graph.add_node(i, fixed=False, position=position)
 
-        if (atoms.positions[i][1] > boundaries['top'] or
-                atoms.positions[i][0] > boundaries['right'] or
-                atoms.positions[i][1] < boundaries['bottom'] or
-                atoms.positions[i][0] < boundaries['left']):
+        if (position[1] > boundaries['top'] or
+                position[0] > boundaries['right'] or
+                position[1] < boundaries['bottom'] or
+                position[0] < boundaries['left']):
             graph.node[i]['fixed'] = True
 
     # Form edges between all nearby atoms
@@ -62,9 +62,8 @@ def relax(atoms, lat_const, steps=1):
             centroid = [0, 0]
 
             for j in edges:
-                node = graph.node[j]
-                centroid[0] += node['position'][0]
-                centroid[1] += node['position'][1]
+                centroid[0] += graph.node[j]['position'][0]
+                centroid[1] += graph.node[j]['position'][1]
 
             centroid[0] /= num_edges
             centroid[1] /= num_edges
@@ -75,6 +74,6 @@ def relax(atoms, lat_const, steps=1):
 
         # Update nodes position to their new position
         for i in atoms_range:
-            graph.node[i]['position'] = atoms.positions[i][:-1]
+            graph.node[i]['position'] = atoms.positions[i][:]
 
     return atoms

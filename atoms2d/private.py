@@ -46,6 +46,26 @@ def where(array, equal):
             return i
 
 
-def isEven(integer):
+def is_even(integer):
     """Return true if number is even, false otherwise."""
     return integer % 2 == 0
+
+
+def is_tm(symbol):
+    """Return true if an element is a transition metal."""
+    return symbol in ['Mo', 'W']
+
+
+def is_dc(symbol):
+    """Return true if an element is a chalcogen."""
+    return symbol in ['S', 'Se']
+
+
+def is_same_type(a, b):
+    """Return true if both material belong to the same group."""
+    return is_tm(a) == is_tm(b) or is_dc(a) == is_dc(b)
+
+
+def is_same_plane(a, b):
+    """Return true if both position lie roughly on the same plane."""
+    return abs(a[2] - b[2]) < 1

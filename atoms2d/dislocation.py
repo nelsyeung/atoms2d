@@ -29,7 +29,7 @@ def core(type, a, elements):
             return 0
 
         for index, p in enumerate(polygon.coords):
-            if (not private.isEven(polygon.sides)
+            if (not private.is_even(polygon.sides)
                     and np.ceil(polygon.sides / 2.0) == index):
                 next_atom = get_next_atom(next_atom)
 
@@ -98,9 +98,9 @@ def line(type, primitive, rows, polarity=0):
 
     # Store TM and DC symbols
     for s in symbols:
-        if s == 'Mo' or s == 'W':
+        if private.is_tm(s):
             elements[0]['symbol'] = s
-        elif s == 'S' or s == 'Se':
+        elif private.is_dc(s):
             elements[1]['symbol'] = s
 
     # Get DC separation distance.

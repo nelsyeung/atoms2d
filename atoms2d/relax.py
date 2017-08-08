@@ -4,7 +4,7 @@ import networkx as nx
 from . import private
 
 
-def relax(atoms, lat_const):
+def relax(atoms, lat_const, steps=1):
     """Relax a structure by minimizing the distance between each atom where the
     edge atoms are all fixed."""
     # Add all atoms as nodes to a graph
@@ -33,16 +33,9 @@ def relax(atoms, lat_const):
             graph.node[i]['fixed'] = True
 
     # Form edges between all nearby atoms
-    loop = 0
-    total_loops = float(num_atoms * num_atoms)
-    print('Creating edges...')
-
+    radius = 1.5 * lat_const
     for i in atoms_range:
         for j in atoms_range:
-            progress = '{0:.0f}%'.format(100.0 * float(loop) / total_loops)
-            print(progress, end='\r')
-            loop += 1
-
             if (i == j or
                     not private.is_same_plane(atoms.positions[i],
                                               atoms.positions[j]) or
@@ -51,39 +44,37 @@ def relax(atoms, lat_const):
 
             distance = atoms.get_distance(i, j)
 
-            if (distance < 1.5 * lat_const):
+            if (distance < radius):
                 graph.add_edge(i, j)
 
-    progress = '{0:.0f}%'.format(100.0 * float(loop) / total_loops)
-    print(progress)
-
     # Move atoms to centroid of each connected nodes
-    for i in atoms_range:
-        edges = graph[i]
-        num_edges = len(edges)
+    for _ in range(steps):
+        for i in atoms_range:
+            edges = graph[i]
+            num_edges = len(edges)
 
-        if (graph.node[i]['fixed'] or
-                num_edges < 6 or
-                not private.is_even(num_edges)):
-            continue
+            if (graph.node[i]['fixed'] or
+                    num_edges < 6 or
+                    not private.is_even(num_edges)):
+                continue
 
-        # Calculate centroid
-        centroid = [0, 0]
+            # Calculate centroid
+            centroid = [0, 0]
 
-        for j in edges:
-            node = graph.node[j]
-            centroid[0] += node['position'][0]
-            centroid[1] += node['position'][1]
+            for j in edges:
+                node = graph.node[j]
+                centroid[0] += node['position'][0]
+                centroid[1] += node['position'][1]
 
-        centroid[0] /= num_edges
-        centroid[1] /= num_edges
+            centroid[0] /= num_edges
+            centroid[1] /= num_edges
 
-        # Move atom to the centroid
-        atoms.positions[i][0] += centroid[0] - graph.node[i]['position'][0]
-        atoms.positions[i][1] += centroid[1] - graph.node[i]['position'][1]
+            # Move atom to the centroid
+            atoms.positions[i][0] += centroid[0] - graph.node[i]['position'][0]
+            atoms.positions[i][1] += centroid[1] - graph.node[i]['position'][1]
 
-    # Update nodes position to their new position
-    for i in atoms_range:
-        graph.node[i]['position'] = atoms.positions[i][:-1]
+        # Update nodes position to their new position
+        for i in atoms_range:
+            graph.node[i]['position'] = atoms.positions[i][:-1]
 
     return atoms

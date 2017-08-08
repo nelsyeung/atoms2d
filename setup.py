@@ -10,7 +10,8 @@ setup(name='atoms2d',
       packages=['atoms2d'],
       zip_safe=False,
       install_requires=[
-          'ase'
+          'ase',
+          'networkx'
       ],
       classifiers=[
           'Intended Audience :: Developers',

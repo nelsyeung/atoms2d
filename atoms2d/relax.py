@@ -4,7 +4,7 @@ import networkx as nx
 from . import private
 
 
-def relax(atoms, lat_const, steps=1):
+def relax(atoms, lat_const, steps=1, fixed=[]):
     """Relax a structure by minimizing the distance between each atom where the
     edge atoms are all fixed."""
     # Add all atoms as nodes to a graph
@@ -31,6 +31,10 @@ def relax(atoms, lat_const, steps=1):
                 position[1] < boundaries['bottom'] or
                 position[0] < boundaries['left']):
             graph.node[i]['fixed'] = True
+        else:
+            for f in fixed:
+                if all([abs(position[x] - f[x]) <= 1e-4 for x in range(2)]):
+                    graph.node[i]['fixed'] = True
 
     # Form edges between all nearby atoms
     radius = 1.5 * lat_const
